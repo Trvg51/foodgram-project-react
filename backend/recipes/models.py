@@ -80,7 +80,7 @@ class IngredientInRecipe(models.Model):
         verbose_name_plural = 'Ингредиенты в рецепте'
         constraints = [
             models.UniqueConstraint(
-                fields=['recipe', 'ingredient'],
+                fields=['recipe', 'ingredients'],
                 name='uniq_ingred_amount'
             )
         ]
@@ -162,7 +162,7 @@ class Cart(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='uniq_fav_recipes',
+                name='recipe in user`s cart',
             )
         ]
 
@@ -195,4 +195,5 @@ class Favorite(models.Model):
         ]
 
     def __str__(self):
-        return f'Избранный рецепт - `{self.recipe}`, у пользователя {self.user}'
+        return (f'Избранный рецепт - `{self.recipe}`,'
+                'у пользователя {self.user}')

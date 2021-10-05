@@ -28,7 +28,7 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(IngredientInRecipe)
 class IngredientInRecipeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'ingredient', 'recipe', 'amount',)
+    list_display = ('id', 'ingredients', 'recipe', 'amount',)
     empty_value_display = '-пусто-'
 
 

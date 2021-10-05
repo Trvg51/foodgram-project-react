@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p+y(ch7w7zu2*%@mhs+#x7!&khvoi+wdsda&+guc!51$g5l!c8'
+SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-p+y(ch7w7zu2*%@mhs+#x7!&khvoi+wdsda&+guc!51$g5l!c8')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -100,17 +100,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'users.CustomUser'
+# AUTH_USER_MODEL = 'users.CustomUser'
 
 DJOSER = {
-    'HIDE_USERS': False,
-    'PERMISSIONS': {
-        'user_list': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
-        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly']
-    },
-    'SERIALIZERS': {
-        'user': 'users.serializers.CustomUserSerializer',
-    },
+    'LOGIN_FIELD': 'email',
 }
 
 REST_FRAMEWORK = {
