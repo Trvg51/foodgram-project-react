@@ -62,12 +62,10 @@ class Recipe(models.Model):
         verbose_name='Автор',
         on_delete=models.CASCADE,
         related_name='recipes',
-        null=False
     )
     name = models.CharField(
         verbose_name='Название',
         max_length=100,
-        null=False
     )
     image = models.ImageField(
         verbose_name='Изображение',
@@ -137,8 +135,8 @@ class IngredientInRecipe(models.Model):
 
     def __str__(self):
         return (f'Понадобится {self.amount}'
-                f'{self.ingredient.measurement_unit}. '
-                f'"{self.ingredient.name}"'
+                f'{self.ingredients.measurement_unit}. '
+                f'"{self.ingredients.name}"'
                 f' для "{self.recipe}"')
 
 
