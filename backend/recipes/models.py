@@ -56,42 +56,6 @@ class Tag(models.Model):
         return self.name
 
 
-class IngredientInRecipe(models.Model):
-    ingredients = models.ForeignKey(
-        Ingredient,
-        verbose_name='Ингредиент',
-        on_delete=models.PROTECT,
-        blank=False,
-    )
-    recipe = models.ForeignKey(
-        'Recipe',
-        verbose_name='Рецепт ингредиента',
-        on_delete=models.CASCADE,
-        related_name='ingredient_in_rec',
-    )
-    amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество ингредиента',
-        null=False,
-        validators=[MinValueValidator(0)],
-    )
-
-    class Meta:
-        verbose_name = 'Ингредиенты в рецепте'
-        verbose_name_plural = 'Ингредиенты в рецепте'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['recipe', 'ingredients'],
-                name='uniq_ingred_amount'
-            )
-        ]
-
-    def __str__(self):
-        return (f'Понадобится {self.amount}'
-                f'{self.ingredient.measurement_unit}. '
-                f'"{self.ingredient.name}"'
-                f' для "{self.recipe}"')
-
-
 class Recipe(models.Model):
     author = models.ForeignKey(
         User,
@@ -119,6 +83,7 @@ class Recipe(models.Model):
         Ingredient,
         verbose_name='Ингредиенты в рецепте',
         through='IngredientInRecipe',
+        blank=False,
     )
     tags = models.ManyToManyField(
         Tag,
@@ -139,6 +104,42 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class IngredientInRecipe(models.Model):
+    ingredients = models.ForeignKey(
+        Ingredient,
+        verbose_name='Ингредиенты',
+        on_delete=models.PROTECT,
+        blank=False,
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name='Рецепт ингредиента',
+        on_delete=models.CASCADE,
+        blank=False,
+    )
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество ингредиента',
+        null=False,
+        validators=[MinValueValidator(0)],
+    )
+
+    class Meta:
+        verbose_name = 'Ингредиенты в рецепте'
+        verbose_name_plural = 'Ингредиенты в рецепте'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredients'],
+                name='uniq_ingred_amount'
+            )
+        ]
+
+    def __str__(self):
+        return (f'Понадобится {self.amount}'
+                f'{self.ingredient.measurement_unit}. '
+                f'"{self.ingredient.name}"'
+                f' для "{self.recipe}"')
 
 
 class Cart(models.Model):
