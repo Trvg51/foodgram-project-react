@@ -1,8 +1,8 @@
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from users.serializers import CustomUserSerializer
 
+from users.serializers import CustomUserSerializer
 from .functions import add_tags_and_ingredients_to_recipe
 from .models import Cart, Favorite, Ingredient, IngredientInRecipe, Recipe, Tag
 
@@ -98,8 +98,15 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
+    def validate_tags(self, data):
+        tags = self.initial_data.get('tags')
+        if len(tags) == 0:
+            raise serializers.ValidationError('Добавьте минимум 1 тэг')
+        return data
+
     def validate_ingredients(self, data):
-        if not data:
+        ingredients = self.initial_data.get('ingredients')
+        if not ingredients:
             raise ValidationError(
                 'Добавьте ингредиент')
         for ingredient in data:

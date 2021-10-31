@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from recipes.models import Recipe
 from rest_framework import serializers
 
+from recipes.models import Recipe
 from .models import Follow
 
 User = get_user_model()
@@ -15,12 +15,6 @@ class CustomUserSerializer(UserSerializer):
         model = User
         fields = ('id', 'email', 'username',
                   'first_name', 'last_name', 'is_subscribed')
-        extra_kwargs = {
-            'email': {'required': True},
-            'username': {'required': True},
-            'first_name': {'required': True},
-            'last_name': {'required': True},
-        }
 
     def get_is_subscribed(self, obj):
         if self.context['request'].user.is_authenticated:
