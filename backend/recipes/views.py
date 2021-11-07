@@ -8,6 +8,7 @@ from rest_framework.response import Response
 
 from .filters import IngredientsFilter, RecipeFilter
 from .models import Cart, Favorite, Ingredient, IngredientInRecipe, Recipe, Tag
+from .pagination import PageNumberPaginator
 from .permissions import IsOwnerOrAdminOrReadOnly
 from .serializers import (IngredientSerializer, RecipeCreateSerializer,
                           RecipeListSerializer, TagSerializer)
@@ -35,6 +36,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsOwnerOrAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
+    pagination_class = PageNumberPaginator
     http_method_names = ['get', 'post', 'put', 'patch', 'head', 'delete']
 
     def get_serializer_class(self):
@@ -50,18 +52,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=['GET', 'DELETE'],
         permission_classes=[permissions.IsAuthenticated],
         detail=True)
-    def favorite(self, request, id):
+    def favorite(self, request, pk):
         if request.method == 'GET':
-            recipe = get_object_or_404(Recipe, id=id)
+            recipe = get_object_or_404(Recipe, id=pk)
             is_favorite = Favorite.objects.filter(
-                author=request.user,
+                user=request.user,
                 recipe=recipe)
             if is_favorite.exists():
                 return Response(
                     {'error': 'Рецепт уже в избранном'},
                     status=status.HTTP_400_BAD_REQUEST)
             Favorite.objects.create(
-                author=request.user,
+                user=request.user,
                 recipe=recipe)
             return Response(
                 {
@@ -72,9 +74,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_201_CREATED)
         elif request.method == 'DELETE':
-            recipe = get_object_or_404(Recipe, id=id)
+            recipe = get_object_or_404(Recipe, id=pk)
             is_favorite = Favorite.objects.filter(
-                author=request.user,
+                user=request.user,
                 recipe=recipe)
             if is_favorite.exists():
                 is_favorite.delete()
@@ -93,18 +95,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=['GET', 'DELETE'],
         permission_classes=[permissions.IsAuthenticated],
         detail=True)
-    def shopping_cart(self, request, id):
+    def shopping_cart(self, request, pk):
         if request.method == 'GET':
-            recipe = get_object_or_404(Recipe, id=id)
+            recipe = get_object_or_404(Recipe, id=pk)
             shopping_cart = Cart.objects.filter(
-                author=request.user,
+                user=request.user,
                 recipe=recipe)
             if shopping_cart.exists():
                 return Response(
                     {'error': 'Рецепт уже находится в списке покупок'},
                     status=status.HTTP_400_BAD_REQUEST)
             Cart.objects.create(
-                author=request.user,
+                user=request.user,
                 recipe=recipe)
             return Response(
                 {
@@ -115,9 +117,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_201_CREATED)
         elif request.method == 'DELETE':
-            recipe = get_object_or_404(Recipe, id=id)
+            recipe = get_object_or_404(Recipe, id=pk)
             shopping_cart = Cart.objects.filter(
-                author=request.user,
+                user=request.user,
                 recipe=recipe)
             if shopping_cart.exists():
                 shopping_cart.delete()
@@ -138,7 +140,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         detail=False)
     def download_shopping_cart(self, request):
         all_ingredients = IngredientInRecipe.objects.filter(
-            recipe__shop_cart__author=request.user).values_list(
+            recipe__shop_cart__user=request.user).values_list(
                 'ingredients__name', 'amount', 'ingredients__measurement_unit')
         amount_ingredients = all_ingredients.values(
             'ingredients__name', 'ingredients__measurement_unit').annotate(

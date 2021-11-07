@@ -25,9 +25,9 @@ class CustomUserViewSet(
     filter_backends = [DjangoFilterBackend]
 
     def get_serializer_class(self):
-        if self.action == 'set_pass':
+        if self.action == 'set_password':
             return SetPasswordSerializer
-        elif self.action == 'about_me':
+        elif self.action == 'me':
             return CustomUserSerializer
         elif self.action == 'create':
             return CustomUserCreateSerializer
@@ -40,7 +40,7 @@ class CustomUserViewSet(
         permission_classes=[permissions.IsAuthenticated],
         detail=False
     )
-    def about_me(self, request):
+    def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -49,7 +49,7 @@ class CustomUserViewSet(
         permission_classes=[permissions.IsAuthenticated],
         detail=False
     )
-    def set_pass(self, request):
+    def set_password(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.request.user.set_password(
@@ -77,9 +77,9 @@ class CustomUserViewSet(
         methods=['GET', 'DELETE'],
         detail=True
     )
-    def subscribe(self, request, id):
+    def subscribe(self, request, pk):
         if request.method == 'GET':
-            author = get_object_or_404(User, id=id)
+            author = get_object_or_404(User, id=pk)
             if request.user == author:
                 return Response(
                     {'error': 'Нельзя подписаться на себя'},
@@ -103,7 +103,7 @@ class CustomUserViewSet(
         else:
             if Follow.objects.filter(
                     user=request.user,
-                    author=get_object_or_404(User, id=id)
+                    author=get_object_or_404(User, id=pk)
             ).delete():
                 return Response(status=status.HTTP_204_NO_CONTENT)
             else:

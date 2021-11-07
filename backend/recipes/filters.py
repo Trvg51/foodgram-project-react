@@ -16,7 +16,7 @@ class IngredientsFilter(django_filters.FilterSet):
 
 class RecipeFilter(django_filters.FilterSet):
 
-    is_in_cart = django_filters.BooleanFilter(
+    is_in_shopping_cart = django_filters.BooleanFilter(
         method='get_in_cart',
     )
     is_favorited = django_filters.BooleanFilter(
@@ -30,7 +30,7 @@ class RecipeFilter(django_filters.FilterSet):
         model = Recipe
         fields = (
             'author',
-            'is_in_cart',
+            'is_in_shopping_cart',
             'is_favorited',
             'tags',
         )
@@ -43,5 +43,5 @@ class RecipeFilter(django_filters.FilterSet):
     def get_is_favorited(self, queryset, name, value):
         if value:
             return Recipe.objects.filter(
-                favorite_recipe__user=self.request.user)
+                favorite_recipe_for_user__user=self.request.user)
         return Recipe.objects.all()

@@ -98,11 +98,13 @@ class IngredientInRecipe(models.Model):
         Ingredient,
         verbose_name='Ингредиенты',
         on_delete=models.PROTECT,
+        related_name='ingredients_amount',
     )
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт ингредиента',
         on_delete=models.CASCADE,
+        related_name='ingredients_amount',
     )
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество ингредиента',

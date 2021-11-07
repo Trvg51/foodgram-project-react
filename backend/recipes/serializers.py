@@ -24,6 +24,7 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField(source='ingredients.name')
     measurement_unit = serializers.ReadOnlyField(
         source='ingredients.measurement_unit')
+    amount = serializers.IntegerField()
 
     class Meta:
         model = IngredientInRecipe
@@ -32,7 +33,7 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
 
 class IngredientInRecipeCreateSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-    amount = serializers.FloatField()
+    amount = serializers.IntegerField()
 
     class Meta:
         model = IngredientInRecipe
@@ -42,10 +43,11 @@ class IngredientInRecipeCreateSerializer(serializers.ModelSerializer):
 class RecipeListSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
+    image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField(read_only=True)
-    is_in_cart = serializers.SerializerMethodField(read_only=True)
+    is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
     ingredients = IngredientInRecipeSerializer(
-        many=True, source='ingredientamount_set')
+        many=True, source='ingredients_amount')
 
     class Meta:
         model = Recipe
@@ -54,25 +56,25 @@ class RecipeListSerializer(serializers.ModelSerializer):
             'author',
             'tags',
             'is_favorited',
-            'is_in_cart',
+            'is_in_shopping_cart',
             'ingredients',
             'name',
             'image',
             'text',
-            'cooking_time'
+            'cooking_time',
         )
 
     def get_is_favorited(self, obj):
         if self.context['request'].user.is_authenticated:
             return Favorite.objects.filter(
-                author=self.context['request'].user,
+                user=self.context['request'].user,
                 recipe=obj).exists()
         return False
 
-    def get_is_in_cart(self, obj):
+    def get_is_in_shopping_cart(self, obj):
         if self.context['request'].user.is_authenticated:
             return Cart.objects.filter(
-                author=self.context['request'].user,
+                user=self.context['request'].user,
                 recipe=obj).exists()
         return False
 
@@ -89,13 +91,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = (
             'id',
-            'author',
             'tags',
+            'author',
             'ingredients',
             'name',
             'image',
             'text',
-            'cooking_time'
+            'cooking_time',
         )
 
     def validate_tags(self, data):
